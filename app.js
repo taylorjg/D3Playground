@@ -1,9 +1,23 @@
+import $ from 'jquery';
 import * as d3 from 'd3';
 
-const data = [10, 3, 5, 6, 7, 3, 8, 9];
+const example1 = d3.select('#example1');
 
-d3.select('#thing')
-    .data(data)
-    .enter()
-    .append('div')
-    .html(d => d);
+let data1 = [10, 3, 5, 6, 7, 3, 8, 9];
+
+$('#changeDataBtn').click(() => {
+    window.console.log('click!');
+    data1 = [1, 2, 3, 4, 5];
+    updateExample1();
+});
+
+updateExample1();
+
+function updateExample1() {
+    example1
+        .data(data1)
+        .enter()
+        .append('div')
+        .html(d => d);
+
+}
