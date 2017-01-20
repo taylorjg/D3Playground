@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import * as d3 from 'd3';
 
 function getRandomInt(min, max) {
@@ -16,17 +15,24 @@ function createRandomData(minValues, maxValues, maxValue) {
     return range(numValues).map(() => getRandomInt(0, maxValue + 1));
 }
 
+const example1 = d3.select('.example1');
+
 function updateExample1(data) {
     function update(selection) {
         selection.text((d, i) => `index: ${i}: ${d}`);
     }
-    const selection = d3.selectAll('#example1Visualisation')
+    const selection = example1
+        .selectAll('.visualisation')
         .selectAll('div')
         .data(data);
     update(selection);
     update(selection.enter().append('div'));
     selection.exit().remove();
-    d3.select('#example1RawData').text(`[${data.join(', ')}]`);
+    example1
+        .select('.rawData')
+        .text(`[${data.join(', ')}]`);
 }
 
-$('#setDataExample1Btn').click(() => updateExample1(createRandomData(1, 10, 50)));
+example1
+    .select('.setDataBtn')
+    .on('click', () => updateExample1(createRandomData(1, 10, 50)));
