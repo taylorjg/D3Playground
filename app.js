@@ -2,7 +2,7 @@ import $ from 'jquery';
 import * as d3 from 'd3';
 
 function updateExample1(data) {
-    d3.selectAll('#example1')
+    d3.selectAll('#example1 #dataArea')
         .selectAll('div')
         .data(data)
         .enter()
@@ -10,4 +10,4 @@ function updateExample1(data) {
         .html(d => d);
 }
 
-$('#setDataBtn').click(() => updateExample1([1, 2, 3, 4, 5]));
+$('#setDataExample1Btn').click(() => updateExample1([1, 2, 3, 4, 5]));
