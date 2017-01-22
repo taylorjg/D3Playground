@@ -54,24 +54,26 @@ function createRandomData(minValues, maxValues, maxValue) {
         const colourCategories = [0, 1, 2, 3, 4];
         const qScale = d3.scaleQuantile().domain(data).range(colourCategories);
         const cScale = d3.scaleOrdinal().domain(colourCategories).range(d3.schemeCategory10);
-        const selection = example
+        function updateCol1(selection) {
+            selection
+                .text((d, i) => `index: ${i}: ${d}`);
+        }
+        function updateCol2(selection) {
+            selection
+                .text(d => `${d}`)
+                .style('background-color', d => cScale(qScale(d)))
+                .style('width', d => `${500 / 50 * d}px`);
+        }
+        const rows = example
             .select('.visualisation table')
             .selectAll('tr')
             .data(data);
-        const newRows = selection
-            .enter()
-            .append('tr');
-        newRows
-            .append('td')
-            .text((d, i) => `index: ${i}: ${d}`);
-        newRows
-            .append('td')
-            .style('width', '500px')
-            .append('div')
-            .text(d => `${d}`)
-            .style('background-color', d => cScale(qScale(d)))
-            .style('width', d => `${500 / 50 * d}px`);
-        selection.exit().remove();
+        updateCol1(rows.select('.col1'));
+        updateCol2(rows.select('.col2 div'));
+        const newRows = rows.enter().append('tr');
+        updateCol1(newRows.append('td').attr('class', 'col1'));
+        updateCol2(newRows.append('td').attr('class', 'col2').style('width', '500px').append('div'));
+        rows.exit().remove();
         example
             .select('.rawData')
             .text(`[${data.join(', ')}]`);
