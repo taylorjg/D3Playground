@@ -68,11 +68,11 @@ function createRandomData(minValues, maxValues, maxValue) {
             .select('.visualisation table')
             .selectAll('tr')
             .data(data);
-        updateCol1(rows.select('.col1'));
-        updateCol2(rows.select('.col2 div'));
+        updateCol1(rows.select('td:nth-of-type(1)'));
+        updateCol2(rows.select('td:nth-of-type(2) div'));
         const newRows = rows.enter().append('tr');
-        updateCol1(newRows.append('td').attr('class', 'col1'));
-        updateCol2(newRows.append('td').attr('class', 'col2').style('width', '500px').append('div'));
+        updateCol1(newRows.append('td'));
+        updateCol2(newRows.append('td').style('width', '500px').append('div'));
         rows.exit().remove();
         example
             .select('.rawData')
