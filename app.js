@@ -41,7 +41,7 @@ function createRandomData(minValues, maxValues, maxValue) {
     example
         .select('.setDataBtn')
         .on('click', () => updateExample(createRandomData(1, 10, 50)));
-} ());
+}());
 
 /*
  * Example 2
@@ -82,7 +82,7 @@ function createRandomData(minValues, maxValues, maxValue) {
     example
         .select('.setDataBtn')
         .on('click', () => updateExample(createRandomData(1, 10, 50)));
-} ());
+}());
 
 /*
  * Example 3
@@ -95,10 +95,42 @@ function createRandomData(minValues, maxValues, maxValue) {
         [0, 0, 0] // [L, D, W]
     ];
 
-    const generateData = () => {
+    const fillScale = d3.scaleOrdinal().range(["red", "#FFBF00", "green"]);
+    const pieChart = d3.pie().sort(null);
+    const g = example
+        .select('svg')
+        .append('g')
+        .attr('transform', 'translate(100, 100)');
+
+    const addResultHistoryEntry = () => {
         const n = getRandomInt(0, 100);
         const result = n < 50 ? [0, 1, 0] : n < 87 ? [1, 0, 0] : [0, 0, 1];
-        resultHistory.push(result);
+        const lastResultHistoryEntry = resultHistory[resultHistory.length - 1];
+        const newResultHistoryEntry = [
+            lastResultHistoryEntry[0] + result[0],
+            lastResultHistoryEntry[1] + result[1],
+            lastResultHistoryEntry[2] + result[2]
+        ];
+        resultHistory.push(newResultHistoryEntry);
+        return newResultHistoryEntry;
+    };
+
+    const updateExample = () => {
+
+        const updatePaths = selection => {
+            selection
+                .attr('d', d3.arc().innerRadius(50).outerRadius(90))
+                .style('fill', (d, i) => fillScale(i));
+        };
+
+        const lastResultHistoryEntry = addResultHistoryEntry();
+        const myPie = pieChart(lastResultHistoryEntry);
+        
+        const paths = g.selectAll('path').data(myPie);
+
+        updatePaths(paths);
+        updatePaths(paths.enter().append('path'));
+
         example
             .select('.rawData')
             .text(`[${resultHistory.join(', ')}]`);
@@ -106,5 +138,5 @@ function createRandomData(minValues, maxValues, maxValue) {
 
     example
         .select('.setDataBtn')
-        .on('click', generateData);
-} ());
+        .on('click', updateExample);
+}());
