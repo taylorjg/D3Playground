@@ -83,3 +83,28 @@ function createRandomData(minValues, maxValues, maxValue) {
         .select('.setDataBtn')
         .on('click', () => updateExample(createRandomData(1, 10, 50)));
 } ());
+
+/*
+ * Example 3
+ */
+
+(function () {
+    const example = d3.select('.example3');
+
+    const resultHistory = [
+        [0, 0, 0] // [L, D, W]
+    ];
+
+    const generateData = () => {
+        const n = getRandomInt(0, 100);
+        const result = n < 50 ? [0, 1, 0] : n < 87 ? [1, 0, 0] : [0, 0, 1];
+        resultHistory.push(result);
+        example
+            .select('.rawData')
+            .text(`[${resultHistory.join(', ')}]`);
+    };
+
+    example
+        .select('.setDataBtn')
+        .on('click', generateData);
+} ());
