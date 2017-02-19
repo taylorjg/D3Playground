@@ -1,94 +1,104 @@
 import * as d3 from 'd3';
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min)) + min;
-}
+const getRandomInt = (minInclusive, maxExclusive) => {
+    minInclusive = Math.ceil(minInclusive);
+    maxExclusive = Math.floor(maxExclusive);
+    return Math.floor(Math.random() * (maxExclusive - minInclusive)) + minInclusive;
+};
 
-function range(numValues) {
-    return Array.from(Array(numValues).keys());
-}
+const range = numValues =>
+    Array.from(Array(numValues).keys());
 
-function createRandomData(minValues, maxValues, maxValue) {
+const createRandomData = (minValues, maxValues, maxValue) => {
     const numValues = getRandomInt(minValues, maxValues + 1);
     return range(numValues).map(() => getRandomInt(0, maxValue + 1));
-}
+};
 
 /*
  * Example 1
  */
 
-(function () {
+{
     const example = d3.select('.example1');
 
-    function updateExample(data) {
-        function update(selection) {
+    const updateExample = data => {
+
+        const updateDivs = selection =>
             selection.text((d, i) => `index: ${i}: ${d}`);
-        }
-        const selection = example
+
+        const divs = example
             .select('.visualisation')
             .selectAll('div')
             .data(data);
-        update(selection);
-        update(selection.enter().append('div'));
-        selection.exit().remove();
+
+        updateDivs(divs);
+        updateDivs(divs.enter().append('div'));
+        divs.exit().remove();
+
         example
             .select('.rawData')
             .text(`[${data.join(', ')}]`);
-    }
+    };
 
     example
         .select('.setDataBtn')
         .on('click', () => updateExample(createRandomData(1, 10, 50)));
-}());
+}
 
 /*
  * Example 2
  */
 
-(function () {
+{
     const example = d3.select('.example2');
+    const MAX_VALUE = 50;
+    const MAX_WIDTH = 500;
 
-    function updateExample(data) {
-        const colourCategories = [0, 1, 2, 3, 4];
-        const qScale = d3.scaleQuantile().domain(data).range(colourCategories);
-        const cScale = d3.scaleOrdinal().domain(colourCategories).range(d3.schemeCategory10);
-        function updateCol1(selection) {
+    const updateExample = data => {
+        const categories = [0, 1, 2, 3, 4];
+        const qScale = d3.scaleQuantile().domain(data).range(categories);
+        const cScale = d3.scaleOrdinal().domain(categories).range(d3.schemeCategory10);
+        const wScale = d3.scaleLinear().domain([0, MAX_VALUE]).range([0, MAX_WIDTH]);
+
+        const updateFirstColumns = selection =>
             selection
                 .text((d, i) => `index: ${i}: ${d}`);
-        }
-        function updateCol2(selection) {
+
+        const updateSecondColumns = selection =>
             selection
                 .text(d => `${d}`)
                 .style('background-color', d => cScale(qScale(d)))
-                .style('width', d => `${500 / 50 * d}px`);
-        }
+                .style('width', d => `${wScale(d)}px`);
+
         const rows = example
             .select('.visualisation table')
             .selectAll('tr')
             .data(data);
-        updateCol1(rows.select('td:nth-of-type(1)'));
-        updateCol2(rows.select('td:nth-of-type(2) div'));
+
+        updateFirstColumns(rows.select('td:nth-of-type(1)'));
+        updateSecondColumns(rows.select('td:nth-of-type(2) div'));
+
         const newRows = rows.enter().append('tr');
-        updateCol1(newRows.append('td'));
-        updateCol2(newRows.append('td').style('width', '500px').append('div'));
+        updateFirstColumns(newRows.append('td'));
+        updateSecondColumns(newRows.append('td').style('width', `${MAX_WIDTH}px`).append('div'));
+
         rows.exit().remove();
+
         example
             .select('.rawData')
             .text(`[${data.join(', ')}]`);
-    }
+    };
 
     example
         .select('.setDataBtn')
-        .on('click', () => updateExample(createRandomData(1, 10, 50)));
-}());
+        .on('click', () => updateExample(createRandomData(1, 10, MAX_VALUE)));
+}
 
 /*
  * Example 3
  */
 
-(function () {
+{
     const example = d3.select('.example3');
 
     const resultHistory = [
@@ -107,10 +117,15 @@ function createRandomData(minValues, maxValues, maxValue) {
             return myArc(d);
         };
     };
-    const g = example
-        .select('svg')
+
+    const svg = example.select('svg');
+    const width = svg.node().scrollWidth;
+    const height = svg.node().scrollHeight;
+    const centreX = width / 2;
+    const centreY = height / 2;
+    const g = svg
         .append('g')
-        .attr('transform', 'translate(100, 100)');
+        .attr('transform', `translate(${centreX}, ${centreY})`);
 
     const addResultHistoryEntry = () => {
         const n = getRandomInt(0, 100);
@@ -125,15 +140,14 @@ function createRandomData(minValues, maxValues, maxValue) {
         return [lastResultHistoryEntry, newResultHistoryEntry];
     };
 
-    const updatePaths = selection => {
-        selection
-            .style('fill', (d, i) => fillScale(i))
-            .transition()
-            .duration(1000)
-            .attrTween('d', myArcTween);
-    };
-
     const updateExample = () => {
+
+        const updatePaths = selection =>
+            selection
+                .style('fill', (d, i) => fillScale(i))
+                .transition()
+                .duration(1000)
+                .attrTween('d', myArcTween);
 
         const [prev, next] = addResultHistoryEntry();
         const prevPie = pieChart(prev);
@@ -156,4 +170,4 @@ function createRandomData(minValues, maxValues, maxValue) {
     example
         .select('.setDataBtn')
         .on('click', updateExample);
-}());
+}
