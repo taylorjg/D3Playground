@@ -97,6 +97,16 @@ function createRandomData(minValues, maxValues, maxValue) {
 
     const fillScale = d3.scaleOrdinal().range(["red", "#FFBF00", "green"]);
     const pieChart = d3.pie().sort(null);
+    const myArc = d3.arc().innerRadius(50).outerRadius(90);
+    const myArcTween = d => {
+        const interpolateStartAngle = d3.interpolate(d.prev.startAngle, d.next.startAngle);
+        const interpolateEndAngle = d3.interpolate(d.prev.endAngle, d.next.endAngle);
+        return t => {
+            d.startAngle = interpolateStartAngle(t);
+            d.endAngle = interpolateEndAngle(t);
+            return myArc(d);
+        };
+    };
     const g = example
         .select('svg')
         .append('g')
@@ -112,24 +122,31 @@ function createRandomData(minValues, maxValues, maxValue) {
             lastResultHistoryEntry[2] + result[2]
         ];
         resultHistory.push(newResultHistoryEntry);
-        return newResultHistoryEntry;
+        return [lastResultHistoryEntry, newResultHistoryEntry];
+    };
+
+    const updatePaths = selection => {
+        selection
+            .style('fill', (d, i) => fillScale(i))
+            .transition()
+            .duration(1000)
+            .attrTween('d', myArcTween);
     };
 
     const updateExample = () => {
 
-        const updatePaths = selection => {
-            selection
-                .attr('d', d3.arc().innerRadius(50).outerRadius(90))
-                .style('fill', (d, i) => fillScale(i));
-        };
+        const [prev, next] = addResultHistoryEntry();
+        const prevPie = pieChart(prev);
+        const nextPie = pieChart(next);
 
-        const lastResultHistoryEntry = addResultHistoryEntry();
-        const myPie = pieChart(lastResultHistoryEntry);
-        
-        const paths = g.selectAll('path').data(myPie);
+        nextPie.forEach((d, i) => {
+            d.prev = prevPie[i];
+            d.next = nextPie[i];
+        });
 
-        updatePaths(paths);
-        updatePaths(paths.enter().append('path'));
+        const paths = g.selectAll('path').data(nextPie);
+        updatePaths(paths, false);
+        updatePaths(paths.enter().append('path'), false);
 
         example
             .select('.rawData')
