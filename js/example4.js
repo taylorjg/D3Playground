@@ -1,11 +1,11 @@
 import * as d3 from 'd3';
-// import * as utils from './utils';
+import * as utils from './utils';
 
 const example = d3.select('.example4');
 
 function* generator() {
     const worker = n => {
-        const ks = Array.from(Array(n).keys()).map(n => n + 1);
+        const ks = utils.range(n).map(n => n + 1);
         return ks.reduce((xs, k) => {
             const prev = xs[0];
             const next = prev * (n + 1 - k) / k;
